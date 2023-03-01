@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from aiohttp.web import json_response as aiohttp_json_response
 from aiohttp.web_response import Response
@@ -18,8 +18,8 @@ def json_response(data: Any = None, status: str = "ok") -> Response:
 def error_json_response(
     http_status: int,
     status: str = "error",
-    message: Optional[str] = None,
-    data: Optional[dict] = None,
+    message: str | None = None,
+    data: dict | None = None,
 ):
     if data is None:
         data = {}

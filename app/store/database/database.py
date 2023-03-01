@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 class Database:
     def __init__(self, app: "Application"):
         self.app = app
-        self._engine: Optional[AsyncEngine] = None
+        self._engine: AsyncEngine | None = None
         self._db: Optional[declarative_base] = None
-        self.session: Optional[AsyncSession] = None
+        self.session: AsyncSession | None = None
 
     async def connect(self, *_: list, **__: dict) -> None:
         self._db = db
