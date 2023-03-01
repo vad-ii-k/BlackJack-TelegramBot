@@ -24,10 +24,10 @@ class BotManager:
             if update.message:
                 await self.app.store.tg_api.send_message(
                     message=Message(
-                        chat_id=update.message.chat.id,
+                        chat=update.message.chat,
                         text=update.message.from_user.first_name,
                         reply_markup=InlineKeyboardMarkup(
-                            [
+                            inline_keyboard=[
                                 [
                                     InlineKeyboardButton(
                                         text="click",
@@ -41,10 +41,10 @@ class BotManager:
             elif update.my_chat_member:
                 await self.app.store.tg_api.send_message(
                     message=Message(
-                        chat_id=update.my_chat_member.chat.id,
+                        chat=update.my_chat_member.chat,
                         text="Привет, я BlackJack бот!",
                         reply_markup=InlineKeyboardMarkup(
-                            [
+                            inline_keyboard=[
                                 [
                                     InlineKeyboardButton(
                                         text="Начать игру",
@@ -64,7 +64,7 @@ class BotManager:
                 )
                 await self.app.store.tg_api.edit_message(
                     message=Message(
-                        chat_id=update.callback_query.message.chat_id,
+                        chat=update.callback_query.message.chat,
                         text=update.callback_query.message.text
                         + "\n"
                         + update.callback_query.from_user.first_name,
