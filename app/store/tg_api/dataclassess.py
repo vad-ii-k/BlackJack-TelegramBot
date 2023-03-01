@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -19,8 +17,8 @@ class Chat(BaseModel):
 class Message(BaseModel):
     chat: Chat
     text: str
-    message_id: Optional[int] = None
-    reply_markup: Optional[InlineKeyboardMarkup] = None
+    message_id: int | None = None
+    reply_markup: InlineKeyboardMarkup | None = None
 
 
 class User(BaseModel):
@@ -33,7 +31,7 @@ class MessageUpdate(BaseModel):
     message_id: int
     from_user: User = Field(alias="from")
     chat: Chat
-    text: Optional[str] = None
+    text: str | None = None
 
 
 class ChatMember(BaseModel):
@@ -59,6 +57,6 @@ class AnswerCallbackQuery(BaseModel):
 
 
 class Update(BaseModel):
-    message: Optional[MessageUpdate] = None
-    my_chat_member: Optional[MyChatMemberUpdate] = None
-    callback_query: Optional[CallbackQuery] = None
+    message: MessageUpdate | None = None
+    my_chat_member: MyChatMemberUpdate | None = None
+    callback_query: CallbackQuery | None = None

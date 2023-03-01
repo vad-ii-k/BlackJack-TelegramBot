@@ -1,6 +1,5 @@
 import typing
 from json import dumps
-from typing import Optional
 
 from aiohttp import TCPConnector
 from aiohttp.client import ClientSession
@@ -19,10 +18,10 @@ class TgApiAccessor(BaseAccessor):
 
     def __init__(self, app: "Application", *args, **kwargs):
         super().__init__(app, *args, **kwargs)
-        self.session: Optional[ClientSession] = None
-        self.poller: Optional[Poller] = None
-        self.offset: Optional[int] = 0
-        self.server_url: Optional[str] = None
+        self.session: ClientSession | None = None
+        self.poller: Poller | None = None
+        self.offset: int = 0
+        self.server_url: str | None = None
 
     async def connect(self, app: "Application"):
         self.session = ClientSession(connector=TCPConnector())
@@ -46,9 +45,9 @@ class TgApiAccessor(BaseAccessor):
             },
         ) as resp:
             data = await resp.json()
-            result = data.get("result", None)
             self.logger.info(data)
-            if result and len(result) > 0:
+            result = data.get("result", [])
+            if result:
                 self.offset = result[-1]["update_id"] + 1
             return parse_obj_as(list[Update], result)
 

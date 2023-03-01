@@ -22,36 +22,38 @@ class BotManager:
     async def handle_updates(self, updates: list[Update]):
         for update in updates:
             if update.message:
+                inline_keyboard = [
+                    [
+                        InlineKeyboardButton(
+                            text="click",
+                            callback_data="{'button': 'click'}",
+                        ),
+                    ]
+                ]
                 await self.app.store.tg_api.send_message(
                     message=Message(
                         chat=update.message.chat,
                         text=update.message.from_user.first_name,
                         reply_markup=InlineKeyboardMarkup(
-                            inline_keyboard=[
-                                [
-                                    InlineKeyboardButton(
-                                        text="click",
-                                        callback_data="{'button': 'click'}",
-                                    ),
-                                ]
-                            ]
+                            inline_keyboard=inline_keyboard,
                         ),
                     )
                 )
             elif update.my_chat_member:
+                inline_keyboard = [
+                    [
+                        InlineKeyboardButton(
+                            text="Начать игру",
+                            callback_data="{'button': 'start'}",
+                        ),
+                    ]
+                ]
                 await self.app.store.tg_api.send_message(
                     message=Message(
                         chat=update.my_chat_member.chat,
                         text="Привет, я BlackJack бот!",
                         reply_markup=InlineKeyboardMarkup(
-                            inline_keyboard=[
-                                [
-                                    InlineKeyboardButton(
-                                        text="Начать игру",
-                                        callback_data="{'button': 'start'}",
-                                    ),
-                                ]
-                            ]
+                            inline_keyboard=inline_keyboard
                         ),
                     )
                 )

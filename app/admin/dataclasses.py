@@ -9,7 +9,7 @@ from aiohttp_session import Session
 class Admin:
     id: int = field(default_factory=int)
     email: str = field(default_factory=int)
-    password: Optional[str] = None
+    password: str | None = None
 
     def is_password_valid(self, password: str):
         return self.password == sha256(password.encode()).hexdigest()
