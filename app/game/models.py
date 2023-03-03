@@ -1,4 +1,4 @@
-from sqlalchemy import VARCHAR, BigInteger, Column, Enum, ForeignKey, Integer
+from sqlalchemy import BigInteger, Column, Enum, ForeignKey, Integer, Text
 from sqlalchemy.orm import relationship
 
 from app.game.states import GameState, PlayerState
@@ -9,7 +9,7 @@ class UserModel(db):
     __tablename__ = "users"
 
     tg_id = Column(BigInteger, primary_key=True, autoincrement=False)
-    name = Column(VARCHAR(100), nullable=False, unique=False)
+    name = Column(Text, nullable=False, unique=False)
 
 
 class PlayerModel(db):
@@ -22,10 +22,10 @@ class PlayerModel(db):
         primary_key=True,
     )
     game_id = Column(Integer, ForeignKey("games.id"), nullable=True)
-    hand = Column(VARCHAR(21), nullable=True, unique=False)
+    hand = Column(Text, nullable=True, unique=False)
     state = Column(
         Enum(PlayerState),
-        server_default=PlayerState.waiting_for_hand.value,
+        server_default=PlayerState.waiting_for_hand,
         nullable=True,
         unique=False,
     )
@@ -57,6 +57,6 @@ class GameModel(db):
     id = Column(BigInteger, primary_key=True)
     chat_id = Column(BigInteger, ForeignKey("chats.chat_id"), nullable=False)
     state = Column(
-        Enum(GameState), server_default=GameState.started.value, unique=False
+        Enum(GameState), server_default=GameState.started, unique=False
     )
     players = relationship("PlayerModel", backref="game")

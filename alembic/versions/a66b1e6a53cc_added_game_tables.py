@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column(
             "tg_id", sa.BigInteger(), autoincrement=False, nullable=False
         ),
-        sa.Column("name", sa.VARCHAR(length=100), nullable=False),
+        sa.Column("name", sa.Text(), nullable=False),
         sa.PrimaryKeyConstraint("tg_id"),
     )
     op.create_table(
@@ -52,7 +52,7 @@ def upgrade() -> None:
         "players",
         sa.Column("tg_id", sa.BigInteger(), nullable=False),
         sa.Column("game_id", sa.Integer(), nullable=True),
-        sa.Column("hand", sa.VARCHAR(length=21), nullable=True),
+        sa.Column("hand", sa.Text(), nullable=True),
         sa.Column(
             "state",
             sa.Enum(
