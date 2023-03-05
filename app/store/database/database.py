@@ -3,9 +3,10 @@ from typing import TYPE_CHECKING, Optional
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
+    async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base
 
 from app.store.database import db
 
@@ -23,11 +24,9 @@ class Database:
     async def connect(self, *_: list, **__: dict) -> None:
         self._db = db
         self._engine = create_async_engine(
-            self.app.config.database.connection_url, echo=True
+            self.app.config.database.connection_url, echo=False
         )
-        self.session = sessionmaker(
-            self._engine, expire_on_commit=False, class_=AsyncSession
-        )
+        self.session = async_sessionmaker(self._engine, expire_on_commit=False)
 
     async def disconnect(self, *_: list, **__: dict) -> None:
         if self._engine:
