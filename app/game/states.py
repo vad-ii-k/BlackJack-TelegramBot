@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class GameState(str, Enum):
-    started = "started"
+    created = "created"
     in_progress = "in_progress"
     finished = "finished"
 

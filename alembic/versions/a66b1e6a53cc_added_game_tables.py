@@ -38,8 +38,8 @@ def upgrade() -> None:
         sa.Column("chat_id", sa.BigInteger(), nullable=False),
         sa.Column(
             "state",
-            sa.Enum("started", "in_progress", "finished", name="gamestate"),
-            server_default="started",
+            sa.Enum("created", "in_progress", "finished", name="gamestate"),
+            server_default="created",
             nullable=True,
         ),
         sa.ForeignKeyConstraint(
@@ -52,7 +52,8 @@ def upgrade() -> None:
         "players",
         sa.Column("tg_id", sa.BigInteger(), nullable=False),
         sa.Column("game_id", sa.Integer(), nullable=True),
-        sa.Column("hand", sa.Text(), nullable=True),
+        sa.Column("hand", sa.Text(), nullable=False, default=""),
+        sa.Column("score", sa.Text(), nullable=False, default="0/0"),
         sa.Column(
             "state",
             sa.Enum(
@@ -61,7 +62,6 @@ def upgrade() -> None:
                 "waiting_for_results",
                 name="playerstate",
             ),
-            server_default="waiting_for_hand",
             nullable=True,
         ),
         sa.ForeignKeyConstraint(

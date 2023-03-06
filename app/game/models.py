@@ -1,5 +1,5 @@
 from sqlalchemy import BigInteger, Column, Enum, ForeignKey, Integer, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, relationship
 
 from app.game.states import GameState, PlayerState
 from app.store.database.sqlalchemy_base import db
@@ -10,6 +10,8 @@ class UserModel(db):
 
     tg_id = Column(BigInteger, primary_key=True, autoincrement=False)
     name = Column(Text, nullable=False, unique=False)
+
+    player: Mapped["PlayerModel"] = relationship(back_populates="user")
 
 
 class PlayerModel(db):
@@ -22,12 +24,19 @@ class PlayerModel(db):
         primary_key=True,
     )
     game_id = Column(Integer, ForeignKey("games.id"), nullable=True)
-    hand = Column(Text, nullable=True, unique=False)
+    hand = Column(Text, default="", nullable=False, unique=False)
     state = Column(
         Enum(PlayerState),
-        server_default=PlayerState.waiting_for_hand,
         nullable=True,
         unique=False,
+    )
+    score = Column(Text, default="0/0", nullable=False, unique=False)
+
+    user: Mapped[UserModel] = relationship(
+        back_populates="player", lazy="joined"
+    )
+    game: Mapped["GameModel"] = relationship(
+        back_populates="players", order_by="PlayerModel.tg_id"
     )
 
 
@@ -57,6 +66,9 @@ class GameModel(db):
     id = Column(BigInteger, primary_key=True)
     chat_id = Column(BigInteger, ForeignKey("chats.chat_id"), nullable=False)
     state = Column(
-        Enum(GameState), server_default=GameState.started, unique=False
+        Enum(GameState), server_default=GameState.created, unique=False
     )
-    players = relationship("PlayerModel", backref="game")
+
+    players: Mapped[list[PlayerModel]] = relationship(
+        back_populates="game", lazy="selectin"
+    )
