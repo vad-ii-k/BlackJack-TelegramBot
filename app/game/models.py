@@ -30,12 +30,14 @@ class PlayerModel(db):
         nullable=True,
         unique=False,
     )
-    score = Column(Text, default="", nullable=False, unique=False)
+    score = Column(Text, default="0/0", nullable=False, unique=False)
 
     user: Mapped[UserModel] = relationship(
         back_populates="player", lazy="joined"
     )
-    game: Mapped["GameModel"] = relationship(back_populates="players")
+    game: Mapped["GameModel"] = relationship(
+        back_populates="players", order_by="PlayerModel.tg_id"
+    )
 
 
 class PlayerStatisticsModel(db):

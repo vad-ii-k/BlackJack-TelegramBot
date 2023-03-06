@@ -70,15 +70,15 @@ class GameAccessor(BaseAccessor):
     async def update_player(
         self,
         player: PlayerModel,
-        state: PlayerState = None,
+        state: PlayerState | None = None,
         hand: str = None,
         score: str = None,
     ) -> PlayerModel:
         query = (
             update(PlayerModel)
             .values(
-                hand=player.hand if hand is None else hand,
-                score=player.score if score is None else score,
+                hand=hand or player.hand,
+                score=score or player.score,
                 state=state,
             )
             .where(PlayerModel.tg_id == player.tg_id)
@@ -111,6 +111,16 @@ class GameAccessor(BaseAccessor):
         )
         return await self._select_first(query)
 
+    async def finish_game(self, game: GameModel):
+        query = (
+            update(PlayerModel)
+            .values(game_id=None, hand="", score="0/0", state=None)
+            .where(PlayerModel.game_id == game.id)
+            .returning(PlayerModel)
+        )
+        await self._select_first(query)
+        await self.update_game(game, state=GameState.finished)
+
     async def get_player_statistics(
         self, tg_id: int
     ) -> PlayerStatisticsModel | None:
@@ -130,8 +140,8 @@ class GameAccessor(BaseAccessor):
             update(PlayerStatisticsModel)
             .values(
                 games_played=player_stats.games_played + 1,
-                games_won=player_stats.games_won + (1 if won else 0),
-                games_lost=player_stats.games_lost + (1 if lost else 0),
+                games_won=player_stats.games_won + won,
+                games_lost=player_stats.games_lost + lost,
             )
             .where(PlayerStatisticsModel.tg_id == player.tg_id)
             .returning(PlayerStatisticsModel)
