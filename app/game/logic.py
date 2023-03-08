@@ -31,7 +31,7 @@ async def create_game(message: Message) -> str:
     if game:
         return CallbackAnswerText.MSG_ALREADY_STARTED
 
-    await app.store.game.CREATE_GAME(message.chat.id)
+    await app.store.game.create_game(message.chat.id)
 
     message.text = "Ожидаем игроков...\n"
     message.reply_markup.inline_keyboard = GameKeyboard.JOIN_GAME
