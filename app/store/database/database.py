@@ -19,7 +19,7 @@ class Database:
         self.app = app
         self._engine: AsyncEngine | None = None
         self._db: Optional[declarative_base] = None
-        self.session: AsyncSession | None = None
+        self.session: async_sessionmaker[AsyncSession] | None = None
 
     async def connect(self, *_: list, **__: dict) -> None:
         self._db = db

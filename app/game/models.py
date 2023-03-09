@@ -36,7 +36,7 @@ class PlayerModel(db):
         back_populates="player", lazy="joined"
     )
     game: Mapped["GameModel"] = relationship(
-        back_populates="players", order_by="PlayerModel.tg_id"
+        back_populates="players", lazy="selectin"
     )
 
 
@@ -70,5 +70,5 @@ class GameModel(db):
     )
 
     players: Mapped[list[PlayerModel]] = relationship(
-        back_populates="game", lazy="selectin"
+        back_populates="game", lazy="selectin", order_by="PlayerModel.tg_id"
     )
