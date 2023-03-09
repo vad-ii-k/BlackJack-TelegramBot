@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+
+  blackjack-tgbot:
+    image: ${BOT_NAME:-tg_bot-image}
+    container_name: ${BOT_NAME:-tg_bot-container}
+    working_dir: /usr/src/app/${BOT_name:-tg_bot}
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    environment:
+      TZ: Europe/Moscow
+      BOT_TOKEN: ${BOT_TOKEN}
+
+      PG_HOST: ${DB_HOST}
+      PG_PORT: ${DB_PORT}
+      PG_USER: ${DB_USER}
+      PG_PASSWORD: ${DB_PASSWORD}
+      PG_NAME: ${DB_NAME}
+    volumes:
+        - .:/usr/src/app/${BOT_NAME:-tg_bot}
+    depends_on:
+      - blackjack_bot-postgres
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        python -m alembic upgrade head
+        poetry run python main.py
+    network_mode: host
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:alpine
+    environment:
+      TZ: Europe/Moscow
+      POSTGRES_DB: ${DB_name}
+      POSTGRES_USER: ${DB_user}
+      POSTGRES_PASSWORD: ${DB_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /usr/src/app/${BOT_name:-tg_bot}/postgres/init:/docker-entrypoint-initdb.d
+      - /usr/src/app/${BOT_name:-tg_bot}/postgres/data:/var/lib/postgresql/data
+    network_mode: host
+    restart: unless-stopped
