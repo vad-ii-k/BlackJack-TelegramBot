@@ -42,6 +42,11 @@ class TgApiAccessor(BaseAccessor):
             params={
                 "offset": self.offset,
                 "timeout": 30,
+                "allowed_updates": [
+                    "message",
+                    "callback_query",
+                    "my_chat_member",
+                ],
             },
         ) as resp:
             data = await resp.json()
@@ -85,6 +90,7 @@ class TgApiAccessor(BaseAccessor):
                 "callback_query_id": answer.id,
                 "text": answer.text,
                 "show_alert": dumps(answer.show_alert),
+                "cache_time": 1,
             },
         ) as resp:
             data = await resp.json()
