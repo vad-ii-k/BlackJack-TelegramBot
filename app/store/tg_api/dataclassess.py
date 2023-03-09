@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -36,6 +38,7 @@ class MessageUpdate(BaseModel):
 
 class ChatMember(BaseModel):
     user = User
+    status: Literal["member", "left"]
 
 
 class MyChatMemberUpdate(BaseModel):
