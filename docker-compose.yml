@@ -3,23 +3,23 @@ version: '3.9'
 services:
 
   blackjack-tgbot:
-    image: ${BOT_name:-tg_bot-image}
-    container_name: ${BOT_name:-tg_bot-container}
+    image: ${BOT_NAME:-tg_bot-image}
+    container_name: ${BOT_NAME:-tg_bot-container}
     working_dir: /usr/src/app/${BOT_name:-tg_bot}
     build:
       context: .
       dockerfile: ./dockerfile
     environment:
       TZ: Europe/Moscow
-      BOT_TOKEN: ${BOT_token}
+      BOT_TOKEN: ${BOT_TOKEN}
 
-      PG_NAME: ${DB_name}
-      PG_USER: ${DB_user}
-      PG_HOST: ${DB_host}
-      PG_PASSWORD: ${DB_password}
-      PG_PORT: ${DB_port}
+      PG_HOST: ${DB_HOST}
+      PG_PORT: ${DB_PORT}
+      PG_USER: ${DB_USER}
+      PG_PASSWORD: ${DB_PASSWORD}
+      PG_NAME: ${DB_NAME}
     volumes:
-        - .:/usr/src/app/${BOT_name:-tg_bot}
+        - .:/usr/src/app/${BOT_NAME:-tg_bot}
     depends_on:
       - blackjack_bot-postgres
     entrypoint: ["/bin/sh", "-c"]

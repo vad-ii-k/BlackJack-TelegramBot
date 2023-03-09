@@ -1,7 +1,7 @@
 FROM python:3.11-alpine
-ENV BOT_name=$BOT_name
+ENV BOT_NAME=$BOT_NAME
 
-WORKDIR /usr/src/app/"${BOT_name:-tg_bot}"
+WORKDIR /usr/src/app/"${BOT_NAME:-tg_bot}"
 
 # Installing curl for poetry
 RUN apk -U add curl

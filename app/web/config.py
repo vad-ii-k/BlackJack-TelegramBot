@@ -46,13 +46,13 @@ def setup_config(app: "Application", env_path: str):
     env.read_env(env_path)
 
     app.config = Config(
-        session=SessionConfig(key=env.str("SESSION_key")),
-        bot=BotConfig(token=env.str("BOT_token")),
+        session=SessionConfig(key=env.str("SESSION_KEY")),
+        bot=BotConfig(token=env.str("BOT_TOKEN")),
         database=DatabaseConfig(
-            host=env.str("DB_host"),
-            port=env.int("DB_port"),
-            user=env.str("DB_user"),
-            password=env.str("DB_password"),
-            database=env.str("DB_name"),
+            host=env.str("DB_HOST"),
+            port=env.int("DB_PORT"),
+            user=env.str("DB_USER"),
+            password=env.str("DB_PASSWORD"),
+            database=env.str("DB_NAME"),
         ),
     )
