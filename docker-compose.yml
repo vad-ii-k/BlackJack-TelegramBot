@@ -5,7 +5,7 @@ services:
   blackjack-tgbot:
     image: ${BOT_NAME:-tg_bot-image}
     container_name: ${BOT_NAME:-tg_bot-container}
-    working_dir: /usr/src/app/${BOT_name:-tg_bot}
+    working_dir: /usr/src/app/${BOT_NAME:-tg_bot}
     build:
       context: .
       dockerfile: ./dockerfile
@@ -34,12 +34,12 @@ services:
     image: postgres:alpine
     environment:
       TZ: Europe/Moscow
-      POSTGRES_DB: ${DB_name}
-      POSTGRES_USER: ${DB_user}
-      POSTGRES_PASSWORD: ${DB_password}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - /usr/src/app/${BOT_name:-tg_bot}/postgres/init:/docker-entrypoint-initdb.d
-      - /usr/src/app/${BOT_name:-tg_bot}/postgres/data:/var/lib/postgresql/data
+      - /usr/src/app/${BOT_NAME:-tg_bot}/postgres/init:/docker-entrypoint-initdb.d
+      - /usr/src/app/${BOT_NAME:-tg_bot}/postgres/data:/var/lib/postgresql/data
     network_mode: host
     restart: unless-stopped
