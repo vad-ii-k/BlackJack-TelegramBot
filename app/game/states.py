@@ -11,3 +11,6 @@ class PlayerState(str, Enum):
     waiting_for_hand = "waiting_for_hand"
     makes_turn = "makes_turn"
     waiting_for_results = "waiting_for_results"
+    won = "won"
+    draw = "draw"
+    lost = "lost"
