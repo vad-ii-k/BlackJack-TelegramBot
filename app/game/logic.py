@@ -111,8 +111,17 @@ async def waiting_for_players_to_turn(message: Message, round_num: int = 1):
         await finish_game(game, message)
 
 
-async def send_player_stats(tg_user: User, chat: Chat) -> str:
+async def send_player_stats(tg_user: User, chat: Chat):
     stats = await app.store.game.get_player_statistics(tg_user.id)
+    if not stats:
+        msg = (
+            "Вы ни разу не играли со мной☹️\n"
+            "Нажмите /start_game, чтобы это исправить)"
+        )
+        await app.store.tg_api.send_message(
+            message=Message(chat=chat, text=msg)
+        )
+        return
 
     mention = f"<a href='tg://user?id={tg_user.id}'>{tg_user.first_name}</a>"
     msg = f"Игрок: {mention}\nㅤ\n"
@@ -125,7 +134,6 @@ async def send_player_stats(tg_user: User, chat: Chat) -> str:
     msg += f"📊 Процент побед: {win_rate:.2f}%"
 
     await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))
-    return msg
 
 
 async def send_rules(chat: Chat):
