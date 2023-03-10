@@ -1,18 +1,14 @@
 import asyncio
-from dataclasses import dataclass
+from enum import Enum
 
 from app.game.keyboards import GameKeyboard
 from app.game.states import PlayerState
-from app.game.utils import (
-    deal_cards,
-    players_roster, finish_game,
-)
+from app.game.utils import deal_cards, finish_game, players_roster
 from app.store.tg_api.dataclassess import CallbackQuery, Message
 from app.web.app import app
 
 
-@dataclass(slots=True, frozen=True)
-class CallbackAnswerText:
+class CallbackAnswerText(Enum, str):
     MSG_ALREADY_STARTED = "Игра уже идет!"
     MSG_GAME_CREATED = "Игра создана!"
     MSG_JOINED_GAME = "Вы добавлены в игру!"
@@ -47,27 +43,29 @@ async def join_game(callback_query: CallbackQuery) -> str:
     if player is None:
         player = await app.store.game.create_player(user.id, user.first_name)
 
-    if player.state is None:
-        game = await app.store.game.get_active_game(message.chat.id)
-        if game:
-            await app.store.game.add_player_to_game(player, game_id=game.id)
-            game = await app.store.game.get_active_game(message.chat.id)
+    if player.state:
+        return CallbackAnswerText.MSG_ALREADY_PLAYING
 
-            message.text = f"Ожидаем игроков...\nㅤ\n{players_roster(game)}"
-            await app.store.tg_api.edit_message(message)
-
-            return CallbackAnswerText.MSG_JOINED_GAME
+    game = await app.store.game.get_active_game(message.chat.id)
+    if not game:
         return CallbackAnswerText.MSG_GAME_ENDED
-    return CallbackAnswerText.MSG_ALREADY_PLAYING
+
+    await app.store.game.add_player_to_game(player, game_id=game.id)
+    game = await app.store.game.get_active_game(message.chat.id)
+    message.text = f"Ожидаем игроков...\nㅤ\n{players_roster(game)}"
+    await app.store.tg_api.edit_message(message)
+    return CallbackAnswerText.MSG_JOINED_GAME
 
 
 async def start_game(message: Message) -> str:
-    if game := await app.store.game.get_active_game(message.chat.id):
-        await deal_cards(game)
-        message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
-        asyncio.create_task(waiting_for_players_to_turn(message))
-        return CallbackAnswerText.MSG_GAME_STARTED
-    return CallbackAnswerText.MSG_GAME_ENDED
+    game = await app.store.game.get_active_game(message.chat.id)
+    if not game:
+        return CallbackAnswerText.MSG_GAME_ENDED
+
+    await deal_cards(game)
+    message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
+    asyncio.create_task(waiting_for_players_to_turn(message))
+    return CallbackAnswerText.MSG_GAME_STARTED
 
 
 async def makes_turn(
@@ -92,7 +90,7 @@ async def waiting_for_players_to_turn(message: Message, round_num: int = 1):
     message.text = f"{round_num} раунд!\nㅤ\n" + players_roster(game, True)
     await app.store.tg_api.edit_message(message)
 
-    for _ in range(1, 6):
+    for _ in range(5):
         if all(pl.state != PlayerState.makes_turn for pl in game.players):
             break
         await asyncio.sleep(2)

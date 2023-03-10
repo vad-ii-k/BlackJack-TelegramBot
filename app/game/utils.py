@@ -32,10 +32,6 @@ def players_roster(
     return roster
 
 
-def get_card() -> tuple[str, str]:
-    return random.choice(RANKS), random.choice(SUITS)
-
-
 def scores_as_int(score: str) -> tuple[int, int]:
     score_1, score_2 = tuple(map(int, score.split("/")))
     return score_1, score_2
@@ -61,8 +57,9 @@ def final_score(scores: str) -> int:
 
 
 def new_hand_and_score(old_hand: str, old_score: str) -> tuple[str, str]:
-    rank, card = get_card()
-    new_hand = old_hand + " • " * (old_hand != "") + rank + card
+    rank, card = random.choice(RANKS), random.choice(SUITS)
+    new_hand = f"{old_hand}{' • ' * (old_hand != '')}{rank}{card}"
+    # new_hand example: 3♥️ • K♥️ • 5♣️
     new_score = calc_new_score(old_score, rank)
     return new_hand, new_score
 
