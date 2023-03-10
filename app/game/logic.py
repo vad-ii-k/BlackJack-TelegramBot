@@ -4,11 +4,11 @@ from enum import Enum
 from app.game.keyboards import GameKeyboard
 from app.game.states import PlayerState
 from app.game.utils import deal_cards, finish_game, players_roster
-from app.store.tg_api.dataclassess import CallbackQuery, Message
+from app.store.tg_api.dataclassess import CallbackQuery, Chat, Message, User
 from app.web.app import app
 
 
-class CallbackAnswerText(Enum, str):
+class CallbackAnswerText(str, Enum):
     MSG_ALREADY_STARTED = "Игра уже идет!"
     MSG_GAME_CREATED = "Игра создана!"
     MSG_JOINED_GAME = "Вы добавлены в игру!"
@@ -109,3 +109,34 @@ async def waiting_for_players_to_turn(message: Message, round_num: int = 1):
 
     elif all(pl.state != PlayerState.makes_turn for pl in game.players):
         await finish_game(game, message)
+
+
+async def send_player_stats(tg_user: User, chat: Chat) -> str:
+    stats = await app.store.game.get_player_statistics(tg_user.id)
+
+    mention = f"<a href='tg://user?id={tg_user.id}'>{tg_user.first_name}</a>"
+    msg = f"Игрок: {mention}\nㅤ\n"
+    msg += f"😎 <u>Сыграно игр</u>: {stats.games_played}\n"
+    msg += f"🤑 Победы: {stats.games_won}\n"
+    msg += f"😡 Поражения: {stats.games_lost}\n"
+    draws = stats.games_played - stats.games_won - stats.games_lost
+    msg += f"🤗 Ничьи: {draws}\nㅤ\n"
+    win_rate = stats.games_won / stats.games_played * 100
+    msg += f"📊 Процент побед: {win_rate:.2f}%"
+
+    await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))
+    return msg
+
+
+async def send_rules(chat: Chat):
+    msg = """
+Привет 🫡
+Я бот для игры в blackjack 🃏.
+Перед началом ознакомьтесь с <a href='https://telegra.ph/Pravila-igry-v-Blackjack-03-10'>правилами</a>.
+
+ 🤖 Список моих команд:
+/start_game - 🆕 Создать новую игру
+/my_statistics - 📊 Статистика Ваших игр
+/help - ❔ Правила игры
+    """
+    await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))

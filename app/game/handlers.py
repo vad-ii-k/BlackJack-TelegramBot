@@ -1,5 +1,12 @@
 from app.game.keyboards import GameKeyboard
-from app.game.logic import create_game, join_game, makes_turn, start_game
+from app.game.logic import (
+    create_game,
+    join_game,
+    makes_turn,
+    send_player_stats,
+    send_rules,
+    start_game,
+)
 from app.game.states import PlayerState
 from app.store.tg_api.dataclassess import (
     AnswerCallbackQuery,
@@ -13,28 +20,28 @@ from app.web.app import app
 
 
 async def handle_message(message: MessageUpdate):
-    if message.text == "/start":
-        await app.store.tg_api.send_message(
-            message=Message(
-                chat=message.chat,
-                text="Сыграем?",
-                reply_markup=InlineKeyboardMarkup(
-                    inline_keyboard=GameKeyboard.CREATE_GAME
-                ),
+    if not message.text:
+        return
+    command = message.text.removesuffix(f"@{app.config.bot.name}")
+    match command:
+        case "/start_game":
+            await app.store.tg_api.send_message(
+                message=Message(
+                    chat=message.chat,
+                    text="Сыграем?",
+                    reply_markup=InlineKeyboardMarkup(
+                        inline_keyboard=GameKeyboard.CREATE_GAME
+                    ),
+                )
             )
-        )
+        case "/my_statistics":
+            await send_player_stats(message.from_user, message.chat)
+        case "/help":
+            await send_rules(message.chat)
 
 
 async def handle_my_chat_member(my_chat_member: MyChatMemberUpdate):
-    await app.store.tg_api.send_message(
-        message=Message(
-            chat=my_chat_member.chat,
-            text="Привет, я BlackJack бот!",
-            reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=GameKeyboard.EMPTY
-            ),
-        )
-    )
+    await send_rules(my_chat_member.chat)
 
 
 async def handle_callback_query(cb_query: CallbackQuery):
