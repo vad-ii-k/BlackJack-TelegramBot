@@ -22,7 +22,7 @@ EMOJI_BY_STATE = {
 def players_roster(
     game: GameModel, with_cards: bool = False, with_score: bool = False
 ) -> str:
-    roster = "<u>Список игроков</u>: \n"
+    roster = f"<u>{'Результаты' if with_score else 'Список игроков'}</u>: \n"
     for player in game.players:
         roster += EMOJI_BY_STATE[player.state]
         roster += f" {player.user.name}"

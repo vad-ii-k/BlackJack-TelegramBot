@@ -29,7 +29,7 @@ async def create_game(message: Message) -> str:
 
     await app.store.game.create_game(message.chat.id)
 
-    message.text = "Ожидаем игроков...\n"
+    message.text = "⏳ Ожидаем игроков...\n"
     message.reply_markup.inline_keyboard = GameKeyboard.JOIN_GAME
     await app.store.tg_api.edit_message(message)
 
@@ -52,7 +52,7 @@ async def join_game(callback_query: CallbackQuery) -> str:
 
     await app.store.game.add_player_to_game(player, game_id=game.id)
     game = await app.store.game.get_active_game(message.chat.id)
-    message.text = f"Ожидаем игроков...\nㅤ\n{players_roster(game)}"
+    message.text = f"⏳ Ожидаем игроков...\nㅤ\n{players_roster(game)}"
     await app.store.tg_api.edit_message(message)
     return CallbackAnswerText.MSG_JOINED_GAME
 
@@ -115,7 +115,7 @@ async def send_player_stats(tg_user: User, chat: Chat):
     stats = await app.store.game.get_player_statistics(tg_user.id)
     if not stats:
         msg = (
-            "Вы ни разу не играли со мной☹️\n"
+            "Вы ни разу не играли со мной ☹️\n"
             "Нажмите /start_game, чтобы это исправить)"
         )
         await app.store.tg_api.send_message(
@@ -145,6 +145,6 @@ async def send_rules(chat: Chat):
  🤖 Список моих команд:
 /start_game - 🆕 Создать новую игру
 /my_statistics - 📊 Статистика Ваших игр
-/help - ❔ Правила игры
+/help - ℹ️ Правила игры
     """
     await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))

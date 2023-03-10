@@ -9,7 +9,7 @@ class GameKeyboard:
     CREATE_GAME = [
         [
             InlineKeyboardButton(
-                text="Начать игру",
+                text="🆕 Начать игру",
                 callback_data="create",
             ),
         ]
@@ -17,11 +17,11 @@ class GameKeyboard:
     JOIN_GAME = [
         [
             InlineKeyboardButton(
-                text="Присоединиться ",
+                text="Присоединиться ➕",
                 callback_data="join",
             ),
             InlineKeyboardButton(
-                text="Все готовы",
+                text="Все готовы ❕",
                 callback_data="start",
             ),
         ]
@@ -29,11 +29,11 @@ class GameKeyboard:
     MAKES_TURN = [
         [
             InlineKeyboardButton(
-                text="Ещё ➕",
+                text="Ещё 🙋",
                 callback_data="hit",
             ),
             InlineKeyboardButton(
-                text="Хватит ✖️",
+                text="Хватит 🙅",
                 callback_data="stand",
             ),
         ]
