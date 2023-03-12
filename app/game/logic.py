@@ -1,25 +1,11 @@
 import asyncio
-from enum import Enum
 
+from app.game.enums import CallbackAnswerText, Commands
 from app.game.keyboards import GameKeyboard
 from app.game.states import PlayerState
 from app.game.utils import deal_cards, finish_game, players_roster
 from app.store.tg_api.dataclassess import CallbackQuery, Chat, Message, User
 from app.web.app import app
-
-
-class CallbackAnswerText(str, Enum):
-    MSG_ALREADY_STARTED = "Игра уже идет!"
-    MSG_GAME_CREATED = "Игра создана!"
-    MSG_JOINED_GAME = "Вы добавлены в игру!"
-    MSG_GAME_ENDED = "Игра уже закончена!"
-    MSG_ALREADY_PLAYING = "Вы уже в игре!"
-    MSG_GAME_STARTED = "Игра началась!"
-    MSG_NOT_IN_GAME = "Вы не участвуете в этой игре!"
-    MSG_WAIT_FOR_RESULTS = "Ожидайте окончания игры!"
-    MSG_ALREADY_MADE_TURN = "Вы уже сделали ход в этом раунде!"
-    MSG_HIT = "Вы взяли карту!"
-    MSG_STAND = "Вы закончили набор карт!"
 
 
 async def create_game(message: Message) -> str:
@@ -116,7 +102,7 @@ async def send_player_stats(tg_user: User, chat: Chat):
     if not stats:
         msg = (
             "Вы ни разу не играли со мной ☹️\n"
-            "Нажмите /start_game, чтобы это исправить)"
+            f"Нажмите {Commands.START_GAME}, чтобы это исправить)"
         )
         await app.store.tg_api.send_message(
             message=Message(chat=chat, text=msg)
@@ -141,10 +127,11 @@ async def send_rules(chat: Chat):
 Привет 🫡
 Я бот для игры в blackjack 🃏.
 Перед началом ознакомьтесь с <a href='https://telegra.ph/Pravila-igry-v-Blackjack-03-10'>правилами</a>.
-
- 🤖 Список моих команд:
-/start_game - 🆕 Создать новую игру
-/my_statistics - 📊 Статистика Ваших игр
-/help - ℹ️ Правила игры
-    """
+"""
+    msg += (
+        "\n🤖 Список моих команд:\n"
+        f"{Commands.START_GAME.value} - 🆕 Создать новую игру\n"
+        f"{Commands.MY_STATISTICS.value} - 📊 Статистика Ваших игр\n"
+        f"{Commands.HELP.value} - ℹ️ Правила игры\n"
+    )
     await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))

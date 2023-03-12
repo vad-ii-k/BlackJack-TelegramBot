@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.game.enums import CallbackData
 from app.store.tg_api.dataclassess import InlineKeyboardButton
 
 
@@ -10,7 +11,7 @@ class GameKeyboard:
         [
             InlineKeyboardButton(
                 text="🆕 Начать игру",
-                callback_data="create",
+                callback_data=CallbackData.CREATE,
             ),
         ]
     ]
@@ -18,11 +19,11 @@ class GameKeyboard:
         [
             InlineKeyboardButton(
                 text="Присоединиться ➕",
-                callback_data="join",
+                callback_data=CallbackData.JOIN,
             ),
             InlineKeyboardButton(
                 text="Все готовы ❕",
-                callback_data="start",
+                callback_data=CallbackData.START,
             ),
         ]
     ]
@@ -30,11 +31,11 @@ class GameKeyboard:
         [
             InlineKeyboardButton(
                 text="Ещё 🙋",
-                callback_data="hit",
+                callback_data=CallbackData.HIT,
             ),
             InlineKeyboardButton(
                 text="Хватит 🙅",
-                callback_data="stand",
+                callback_data=CallbackData.STAND,
             ),
         ]
     ]
