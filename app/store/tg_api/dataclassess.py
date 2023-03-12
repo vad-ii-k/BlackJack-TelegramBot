@@ -20,7 +20,9 @@ class Message(BaseModel):
     chat: Chat
     text: str
     message_id: int | None = None
-    reply_markup: InlineKeyboardMarkup | None = None
+    reply_markup: InlineKeyboardMarkup = InlineKeyboardMarkup(
+        inline_keyboard=[[]]
+    )
 
 
 class User(BaseModel):
