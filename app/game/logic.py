@@ -22,8 +22,8 @@ async def create_game(message: Message) -> str:
     return CallbackAnswerText.MSG_GAME_CREATED
 
 
-async def join_game(callback_query: CallbackQuery) -> str:
-    message, user = callback_query.message, callback_query.from_user
+async def join_game(cb_query: CallbackQuery) -> str:
+    message, user = cb_query.message, cb_query.from_user
 
     player = await app.store.game.get_player(user.id)
     if player is None:
@@ -43,22 +43,20 @@ async def join_game(callback_query: CallbackQuery) -> str:
     return CallbackAnswerText.MSG_JOINED_GAME
 
 
-async def start_game(message: Message) -> str:
-    game = await app.store.game.get_active_game(message.chat.id)
+async def start_game(cb_query: CallbackQuery) -> str:
+    game = await app.store.game.get_active_game(cb_query.message.chat.id)
     if not game:
         return CallbackAnswerText.MSG_GAME_ENDED
 
     await deal_cards(game)
-    message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
-    asyncio.create_task(waiting_for_players_to_turn(message))
+    cb_query.message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
+    asyncio.create_task(waiting_for_players_to_turn(cb_query.message))
     return CallbackAnswerText.MSG_GAME_STARTED
 
 
-async def makes_turn(
-    callback_query: CallbackQuery, new_state: PlayerState
-) -> str:
-    player = await app.store.game.get_player(callback_query.from_user.id)
-    if not player:
+async def makes_turn(cb_query: CallbackQuery, new_state: PlayerState) -> str:
+    player = await app.store.game.get_player(cb_query.from_user.id)
+    if not player or not player.state:
         return CallbackAnswerText.MSG_NOT_IN_GAME
     elif player.state == PlayerState.waiting_for_results:
         return CallbackAnswerText.MSG_WAIT_FOR_RESULTS
