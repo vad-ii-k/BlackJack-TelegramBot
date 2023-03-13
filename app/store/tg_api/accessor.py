@@ -1,9 +1,8 @@
 import typing
-from json import dumps
 
 from aiohttp import TCPConnector
 from aiohttp.client import ClientSession
-from pydantic import parse_obj_as
+from pydantic import ValidationError, parse_obj_as
 
 from app.base.base_accessor import BaseAccessor
 from app.store.tg_api.dataclassess import AnswerCallbackQuery, Message, Update
@@ -54,7 +53,11 @@ class TgApiAccessor(BaseAccessor):
             result = data.get("result", [])
             if result:
                 self.offset = result[-1]["update_id"] + 1
-            return parse_obj_as(list[Update], result)
+            try:
+                return parse_obj_as(list[Update], result)
+            except ValidationError as err:
+                self.logger.error(err)
+                return []
 
     async def send_message(self, message: Message) -> None:
         async with self.session.get(
@@ -64,6 +67,7 @@ class TgApiAccessor(BaseAccessor):
                 "text": message.text,
                 "reply_markup": message.reply_markup.json(),
                 "parse_mode": "HTML",
+                "disable_web_page_preview": "true",
             },
         ) as resp:
             data = await resp.json()
@@ -89,7 +93,7 @@ class TgApiAccessor(BaseAccessor):
             params={
                 "callback_query_id": answer.id,
                 "text": answer.text,
-                "show_alert": dumps(answer.show_alert),
+                "show_alert": str(answer.show_alert),
                 "cache_time": 1,
             },
         ) as resp:
