@@ -12,6 +12,7 @@ services:
     environment:
       TZ: Europe/Moscow
       BOT_TOKEN: ${BOT_TOKEN}
+      BOT_NAME: ${BOT_NAME}
 
       PG_HOST: ${DB_HOST}
       PG_PORT: ${DB_PORT}
@@ -21,7 +22,7 @@ services:
     volumes:
         - .:/usr/src/app/${BOT_NAME:-tg_bot}
     depends_on:
-      - blackjack_bot-postgres
+      - postgres
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
