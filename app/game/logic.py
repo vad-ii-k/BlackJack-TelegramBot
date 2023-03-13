@@ -47,6 +47,8 @@ async def start_game(cb_query: CallbackQuery) -> str:
     game = await app.store.game.get_active_game(cb_query.message.chat.id)
     if not game:
         return CallbackAnswerText.MSG_GAME_ENDED
+    if cb_query.from_user.id not in (pl.tg_id for pl in game.players):
+        return CallbackAnswerText.MSG_NOT_IN_GAME
 
     await deal_cards(game)
     cb_query.message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
@@ -100,7 +102,7 @@ async def send_player_stats(tg_user: User, chat: Chat):
     if not stats:
         msg = (
             "Вы ни разу не играли со мной ☹️\n"
-            f"Нажмите {Commands.START_GAME}, чтобы это исправить)"
+            f"Нажмите {Commands.START_GAME.value}, чтобы это исправить)"
         )
         await app.store.tg_api.send_message(
             message=Message(chat=chat, text=msg)

@@ -52,7 +52,7 @@ async def handle_callback_query(cb_query: CallbackQuery):
         case CallbackData.JOIN:
             cb_answer_text = await join_game(cb_query)
         case CallbackData.START:
-            cb_answer_text = await start_game(cb_query.message)
+            cb_answer_text = await start_game(cb_query)
         case CallbackData.HIT:
             cb_answer_text = await makes_turn(
                 cb_query, PlayerState.waiting_for_hand
