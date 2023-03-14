@@ -23,6 +23,7 @@ class Message(BaseModel):
     reply_markup: InlineKeyboardMarkup = InlineKeyboardMarkup(
         inline_keyboard=[[]]
     )
+    reply_to_message_id: int | None = None
 
 
 class User(BaseModel):

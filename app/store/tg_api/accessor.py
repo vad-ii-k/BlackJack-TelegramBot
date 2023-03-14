@@ -1,3 +1,4 @@
+import json
 import typing
 
 from aiohttp import TCPConnector
@@ -5,7 +6,12 @@ from aiohttp.client import ClientSession
 from pydantic import ValidationError, parse_obj_as
 
 from app.base.base_accessor import BaseAccessor
-from app.store.tg_api.dataclassess import AnswerCallbackQuery, Message, Update
+from app.store.tg_api.dataclassess import (
+    AnswerCallbackQuery,
+    Message,
+    MessageUpdate,
+    Update,
+)
 from app.store.tg_api.poller import Poller
 
 if typing.TYPE_CHECKING:
@@ -59,19 +65,24 @@ class TgApiAccessor(BaseAccessor):
                 self.logger.error(err)
                 return []
 
-    async def send_message(self, message: Message) -> None:
+    async def send_message(self, message: Message) -> MessageUpdate:
         async with self.session.get(
             url=self.server_url + "sendMessage",
             params={
                 "chat_id": message.chat.id,
                 "text": message.text,
                 "reply_markup": message.reply_markup.json(),
+                "reply_to_message_id": json.dumps(message.reply_to_message_id),
                 "parse_mode": "HTML",
                 "disable_web_page_preview": "true",
             },
         ) as resp:
             data = await resp.json()
             self.logger.info(data)
+            try:
+                return parse_obj_as(MessageUpdate, data.get("result", {}))
+            except ValidationError as err:
+                self.logger.error(err)
 
     async def edit_message(self, message: Message) -> None:
         async with self.session.get(
