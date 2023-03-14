@@ -95,12 +95,14 @@ class GameAccessor(BaseAccessor):
         )
         return await self._select_first(query)
 
-    async def create_game(self, chat_id: int) -> GameModel:
+    async def create_game(self, chat_id: int, message_id: int) -> GameModel:
         chat = await self._get_chat(chat_id)
         if chat is None:
             await self._create_chat(chat_id)
 
-        return await self._add_object(GameModel(chat_id=chat_id))
+        return await self._add_object(
+            GameModel(chat_id=chat_id, message_id=message_id)
+        )
 
     async def update_game(self, game: GameModel, state: GameState) -> GameModel:
         query = (

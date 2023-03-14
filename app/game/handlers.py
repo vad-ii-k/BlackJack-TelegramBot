@@ -1,9 +1,9 @@
 from app.game.enums import CallbackData, Commands
-from app.game.keyboards import GameKeyboard
 from app.game.logic import (
     create_game,
     join_game,
     makes_turn,
+    send_msg_to_create_game,
     send_player_stats,
     send_rules,
     start_game,
@@ -12,8 +12,6 @@ from app.game.states import PlayerState
 from app.store.tg_api.dataclassess import (
     AnswerCallbackQuery,
     CallbackQuery,
-    InlineKeyboardMarkup,
-    Message,
     MessageUpdate,
     MyChatMemberUpdate,
 )
@@ -26,15 +24,7 @@ async def handle_message(message: MessageUpdate):
     command = message.text.removesuffix(f"@{app.config.bot.name}")
     match command:
         case Commands.START_GAME:
-            await app.store.tg_api.send_message(
-                message=Message(
-                    chat=message.chat,
-                    text="Сыграем?",
-                    reply_markup=InlineKeyboardMarkup(
-                        inline_keyboard=GameKeyboard.CREATE_GAME
-                    ),
-                )
-            )
+            await send_msg_to_create_game(message)
         case Commands.MY_STATISTICS:
             await send_player_stats(message.from_user, message.chat)
         case Commands.HELP:

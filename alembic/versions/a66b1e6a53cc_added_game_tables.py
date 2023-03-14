@@ -42,6 +42,7 @@ def upgrade() -> None:
             server_default="created",
             nullable=True,
         ),
+        sa.Column("message_id", sa.BigInteger(), nullable=False),
         sa.ForeignKeyConstraint(
             ["chat_id"],
             ["chats.chat_id"],

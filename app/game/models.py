@@ -68,6 +68,7 @@ class GameModel(db):
     state = Column(
         Enum(GameState), server_default=GameState.created, unique=False
     )
+    message_id = Column(BigInteger, nullable=False, unique=True)
 
     players: Mapped[list[PlayerModel]] = relationship(
         back_populates="game", lazy="selectin", order_by="PlayerModel.tg_id"

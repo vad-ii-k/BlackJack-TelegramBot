@@ -2,18 +2,23 @@ import asyncio
 
 from app.game.enums import CallbackAnswerText, Commands
 from app.game.keyboards import GameKeyboard
-from app.game.states import PlayerState
+from app.game.states import GameState, PlayerState
 from app.game.utils import deal_cards, finish_game, players_roster
-from app.store.tg_api.dataclassess import CallbackQuery, Chat, Message, User
+from app.store.tg_api.dataclassess import (
+    CallbackQuery,
+    Chat,
+    InlineKeyboardMarkup,
+    Message,
+    MessageUpdate,
+    User,
+)
 from app.web.app import app
 
 
 async def create_game(message: Message) -> str:
     game = await app.store.game.get_active_game(message.chat.id)
-    if game:
-        return CallbackAnswerText.MSG_ALREADY_STARTED
-
-    await app.store.game.create_game(message.chat.id)
+    if game.state != GameState.in_progress:
+        await app.store.game.update_game(game, GameState.in_progress)
 
     message.text = "⏳ Ожидаем игроков...\n"
     message.reply_markup.inline_keyboard = GameKeyboard.JOIN_GAME
@@ -95,6 +100,34 @@ async def waiting_for_players_to_turn(message: Message, round_num: int = 1):
 
     elif all(pl.state != PlayerState.makes_turn for pl in game.players):
         await finish_game(game, message)
+
+
+async def send_msg_to_create_game(message: MessageUpdate):
+    game = await app.store.game.get_active_game(message.chat.id)
+    if not game:
+        message = Message(
+            chat=message.chat,
+            text="Сыграем?",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=GameKeyboard.CREATE_GAME
+            ),
+        )
+        game_msg = await app.store.tg_api.send_message(message)
+        await app.store.game.create_game(message.chat.id, game_msg.message_id)
+        return
+
+    msg_text = (
+        "Идёт набор игроков!"
+        if game.state == GameState.created
+        else "Игра уже идёт!"
+    )
+
+    message = Message(
+        chat=message.chat,
+        text=msg_text,
+        reply_to_message_id=game.message_id,
+    )
+    await app.store.tg_api.send_message(message)
 
 
 async def send_player_stats(tg_user: User, chat: Chat):
