@@ -55,6 +55,8 @@ def upgrade() -> None:
         sa.Column("game_id", sa.Integer(), nullable=True),
         sa.Column("hand", sa.Text(), nullable=False, default=""),
         sa.Column("score", sa.Text(), nullable=False, default="0/0"),
+        sa.Column("balance", sa.Integer(), nullable=False, default=10000),
+        sa.Column("bet", sa.Integer(), nullable=True),
         sa.Column(
             "state",
             sa.Enum(

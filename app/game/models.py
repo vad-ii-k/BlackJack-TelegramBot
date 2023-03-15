@@ -31,6 +31,8 @@ class PlayerModel(db):
         unique=False,
     )
     score = Column(Text, default="0/0", nullable=False, unique=False)
+    balance = Column(Integer, default=10000, nullable=False, unique=False)
+    bet = Column(Integer, nullable=True, unique=False)
 
     user: Mapped[UserModel] = relationship(
         back_populates="player", lazy="joined"
