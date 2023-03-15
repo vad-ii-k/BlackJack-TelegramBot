@@ -71,14 +71,18 @@ class GameAccessor(BaseAccessor):
         self,
         player: PlayerModel,
         state: PlayerState | None = None,
-        hand: str = None,
-        score: str = None,
+        hand: str | None = None,
+        score: str | None = None,
+        bet: int | None = None,
+        balance: int | None = None,
     ) -> PlayerModel:
         query = (
             update(PlayerModel)
             .values(
                 hand=hand or player.hand,
                 score=score or player.score,
+                bet=bet or player.bet,
+                balance=balance or player.balance,
                 state=state,
             )
             .where(PlayerModel.tg_id == player.tg_id)
@@ -116,7 +120,7 @@ class GameAccessor(BaseAccessor):
     async def finish_game(self, game: GameModel):
         query = (
             update(PlayerModel)
-            .values(game_id=None, hand="", score="0/0", state=None)
+            .values(game_id=None, hand="", score="0/0", state=None, bet=None)
             .where(PlayerModel.game_id == game.id)
             .returning(PlayerModel)
         )
