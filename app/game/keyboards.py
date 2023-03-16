@@ -27,6 +27,26 @@ class GameKeyboard:
             ),
         ]
     ]
+    PLACE_BET = [
+        [
+            InlineKeyboardButton(
+                text="100 💲",
+                callback_data=f"{CallbackData.BET.value}:100",
+            ),
+            InlineKeyboardButton(
+                text="200 💲",
+                callback_data=f"{CallbackData.BET.value}:200",
+            ),
+            InlineKeyboardButton(
+                text="400 💲",
+                callback_data=f"{CallbackData.BET.value}:400",
+            ),
+            InlineKeyboardButton(
+                text="800 💲",
+                callback_data=f"{CallbackData.BET.value}:800",
+            ),
+        ]
+    ]
     MAKES_TURN = [
         [
             InlineKeyboardButton(

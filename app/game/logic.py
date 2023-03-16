@@ -2,8 +2,14 @@ import asyncio
 
 from app.game.enums import CallbackAnswerText, Commands
 from app.game.keyboards import GameKeyboard
+from app.game.models import GameModel
 from app.game.states import GameState, PlayerState
-from app.game.utils import deal_cards, finish_game, players_roster
+from app.game.utils import (
+    PlayersRosterMsgText,
+    calc_game_results,
+    deal_cards,
+    dealer_hand_and_final_score,
+)
 from app.store.tg_api.dataclassess import (
     CallbackQuery,
     Chat,
@@ -43,7 +49,7 @@ async def join_game(cb_query: CallbackQuery) -> str:
 
     await app.store.game.add_player_to_game(player, game_id=game.id)
     game = await app.store.game.get_active_game(message.chat.id)
-    message.text = f"⏳ Ожидаем игроков...\nㅤ\n{players_roster(game)}"
+    message.text = PlayersRosterMsgText(game.players).connection()
     await app.store.tg_api.edit_message(message)
     return CallbackAnswerText.MSG_JOINED_GAME
 
@@ -53,12 +59,27 @@ async def start_game(cb_query: CallbackQuery) -> str:
     if not game:
         return CallbackAnswerText.MSG_GAME_ENDED
     if cb_query.from_user.id not in (pl.tg_id for pl in game.players):
-        return CallbackAnswerText.MSG_NOT_IN_GAME
+        return CallbackAnswerText.MSG_JOIN_TO_TAKE_PART
 
-    await deal_cards(game)
-    cb_query.message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
-    asyncio.create_task(waiting_for_players_to_turn(cb_query.message))
-    return CallbackAnswerText.MSG_GAME_STARTED
+    cb_query.message.reply_markup.inline_keyboard = GameKeyboard.PLACE_BET
+    cb_query.message.text = PlayersRosterMsgText(game.players).with_balances()
+    await app.store.tg_api.edit_message(cb_query.message)
+
+    asyncio.create_task(waiting_for_players_to_bet(cb_query.message))
+
+    return CallbackAnswerText.MSG_PLACE_BET
+
+
+async def place_bet(cb_query: CallbackQuery) -> str:
+    player = await app.store.game.get_player(cb_query.from_user.id)
+    if not player or not player.state:
+        return CallbackAnswerText.MSG_NOT_IN_GAME
+    elif player.bet:
+        return CallbackAnswerText.MSG_ALREADY_PLACES_BET
+    else:
+        bet = cb_query.data.split(":")[1]
+        await app.store.game.update_player(player, bet=int(bet))
+        return CallbackAnswerText.MSG_BID_ACCEPTED
 
 
 async def makes_turn(cb_query: CallbackQuery, new_state: PlayerState) -> str:
@@ -78,7 +99,7 @@ async def makes_turn(cb_query: CallbackQuery, new_state: PlayerState) -> str:
 
 async def waiting_for_players_to_turn(message: Message, round_num: int = 1):
     game = await app.store.game.get_active_game(message.chat.id)
-    message.text = f"{round_num} раунд!\nㅤ\n" + players_roster(game, True)
+    message.text = PlayersRosterMsgText(game.players).with_cards(round_num)
     await app.store.tg_api.edit_message(message)
 
     for _ in range(5):
@@ -102,6 +123,29 @@ async def waiting_for_players_to_turn(message: Message, round_num: int = 1):
         await finish_game(game, message)
 
 
+async def waiting_for_players_to_bet(message: Message):
+    game = await app.store.game.get_active_game(message.chat.id)
+    for _ in range(5):
+        if all(pl.bet is not None for pl in game.players):
+            break
+        await asyncio.sleep(2)
+        game = await app.store.game.get_active_game(message.chat.id)
+
+    for player in game.players:
+        if not player.bet:
+            await app.store.game.update_player(player, bet=100)
+
+    game = await app.store.game.get_active_game(message.chat.id)
+    message.text = PlayersRosterMsgText(game.players).with_bids()
+    message.reply_markup.inline_keyboard = GameKeyboard.EMPTY
+    await deal_cards(game)
+    await app.store.tg_api.edit_message(message)
+    await asyncio.sleep(3)
+
+    message.reply_markup.inline_keyboard = GameKeyboard.MAKES_TURN
+    asyncio.create_task(waiting_for_players_to_turn(message))
+
+
 async def send_msg_to_create_game(message: MessageUpdate):
     game = await app.store.game.get_active_game(message.chat.id)
     if not game:
@@ -116,12 +160,7 @@ async def send_msg_to_create_game(message: MessageUpdate):
         await app.store.game.create_game(message.chat.id, game_msg.message_id)
         return
 
-    msg_text = (
-        "Идёт набор игроков!"
-        if game.state == GameState.created
-        else "Игра уже идёт!"
-    )
-
+    msg_text = "Игра уже запущена!"
     message = Message(
         chat=message.chat,
         text=msg_text,
@@ -131,19 +170,21 @@ async def send_msg_to_create_game(message: MessageUpdate):
 
 
 async def send_player_stats(tg_user: User, chat: Chat):
-    stats = await app.store.game.get_player_statistics(tg_user.id)
-    if not stats:
+    player = await app.store.game.get_player(tg_user.id)
+    if not player:
         msg = (
             "Вы ни разу не играли со мной ☹️\n"
             f"Нажмите {Commands.START_GAME.value}, чтобы это исправить)"
         )
-        await app.store.tg_api.send_message(
-            message=Message(chat=chat, text=msg)
-        )
+        message = Message(chat=chat, text=msg)
+        await app.store.tg_api.send_message(message)
         return
 
-    mention = f"<a href='tg://user?id={tg_user.id}'>{tg_user.first_name}</a>"
-    msg = f"Игрок: {mention}\nㅤ\n"
+    stats = await app.store.game.get_player_statistics(tg_user.id)
+
+    mention = f"<a href='tg://user?id={player.tg_id}'>{player.user.name}</a>"
+    msg = f"🧑🏼‍💻 Игрок: {mention}\n"
+    msg += f"💰 Баланс: {player.balance}\nㅤ\n"
     msg += f"😎 <u>Сыграно игр</u>: {stats.games_played}\n"
     msg += f"🤑 Победы: {stats.games_won}\n"
     msg += f"😡 Поражения: {stats.games_lost}\n"
@@ -168,3 +209,18 @@ async def send_rules(chat: Chat):
         f"{Commands.HELP.value} - ℹ️ Правила игры\n"
     )
     await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))
+
+
+async def finish_game(game: GameModel, message: Message):
+    dealer_hand, dealer_score = dealer_hand_and_final_score()
+    await calc_game_results(game, dealer_score)
+    game = await app.store.game.get_active_game(message.chat.id)
+
+    message.text = (
+        PlayersRosterMsgText(game.players).with_results()
+        + f"🤖 Дилер: {dealer_hand} ({dealer_score})"
+    )
+    message.reply_markup.inline_keyboard = GameKeyboard.EMPTY
+    await app.store.tg_api.edit_message(message)
+
+    await app.store.game.finish_game(game)

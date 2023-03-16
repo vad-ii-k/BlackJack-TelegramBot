@@ -1,9 +1,7 @@
 import random
 
-from app.game.keyboards import GameKeyboard
-from app.game.models import GameModel
+from app.game.models import GameModel, PlayerModel
 from app.game.states import PlayerState
-from app.store.tg_api.dataclassess import Message
 from app.web.app import app
 
 SUITS = ["♠️", "♣️", "♥️", "♦️"]
@@ -19,17 +17,54 @@ EMOJI_BY_STATE = {
 }
 
 
-def players_roster(
-    game: GameModel, with_cards: bool = False, with_score: bool = False
-) -> str:
-    roster = f"<u>{'Результаты' if with_score else 'Список игроков'}</u>: \n"
-    for player in game.players:
-        roster += EMOJI_BY_STATE[player.state]
-        roster += f" {player.user.name}"
-        roster += f": {player.hand}" * with_cards
-        roster += f" ({final_score(player.score)})" * with_score
-        roster += "\n" + "ㅤ\n" * with_cards
-    return roster
+class PlayersRosterMsgText:
+    def __init__(self, players: list[PlayerModel]):
+        self.players = players
+
+    def connection(self) -> str:
+        roster = "⏳ Ожидаем игроков...\nㅤ\n"
+        roster += "<u>Список игроков</u>: \n"
+        for player in self.players:
+            roster += f" — {player.user.name}\n"
+        return roster
+
+    def with_balances(self) -> str:
+        roster = "⏳ Делайте ваши ставки!\nㅤ\n"
+        roster += "<u>Баланс игроков</u>: \n"
+        for player in self.players:
+            roster += f" — {player.user.name}: {player.balance} 💰\n"
+        return roster
+
+    def with_bids(self) -> str:
+        roster = "Ставки сделаны!\nㅤ\n"
+        roster += "<u>Ставки игроков</u>: \n"
+        for player in self.players:
+            roster += f" — {player.user.name}: {player.bet} 💵\n"
+        return roster
+
+    def with_cards(self, round_num: int) -> str:
+        roster = f"{round_num} раунд!\nㅤ\n"
+        roster += "<u>Карты игроков</u>: \n"
+        for player in self.players:
+            roster += f"{EMOJI_BY_STATE[player.state]} {player.user.name}"
+            roster += f": {player.hand}\nㅤ\n"
+        return roster
+
+    def with_results(self) -> str:
+        roster = "Игра окончена!\nㅤ\n"
+        roster += "<u>Результаты</u>: \n"
+        for player in self.players:
+            roster += f"{EMOJI_BY_STATE[player.state]} {player.user.name}"
+
+            if player.state == PlayerState.won:
+                roster += f": + {player.bet} 💵\n"
+            elif player.state == PlayerState.lost:
+                roster += f": - {player.bet} 💵\n"
+            else:
+                roster += f": + 0 💵\n"
+
+            roster += f" {player.hand} ({final_score(player.score)})\nㅤ\n"
+        return roster
 
 
 def scores_as_int(score: str) -> tuple[int, int]:
@@ -101,7 +136,8 @@ def dealer_hand_and_final_score() -> tuple[str, int]:
 
 async def calc_game_results(game: GameModel, dealer_score: int):
     for player in game.players:
-        if player.state == PlayerState.waiting_for_results:
+        new_state = player.state
+        if PlayerState.waiting_for_results:
             player_score = final_score(player.score)
             if player_score > 21 or player_score < dealer_score <= 21:
                 new_state = PlayerState.lost
@@ -109,25 +145,19 @@ async def calc_game_results(game: GameModel, dealer_score: int):
                 new_state = PlayerState.won
             else:
                 new_state = PlayerState.draw
-            player = await app.store.game.update_player(player, new_state)
+
+        new_balance = player.balance
+        if new_state == PlayerState.won:
+            new_balance += player.bet
+        elif player.balance == PlayerState.lost:
+            new_balance -= player.bet
+
+        if player.state != new_state or player.balance != new_balance:
+            player = await app.store.game.update_player(
+                player, state=new_state, balance=new_balance
+            )
         await app.store.game.update_player_statistics(
             player,
             player.state == PlayerState.won,
             player.state == PlayerState.lost,
         )
-
-
-async def finish_game(game: GameModel, message: Message):
-    dealer_hand, dealer_score = dealer_hand_and_final_score()
-    await calc_game_results(game, dealer_score)
-    game = await app.store.game.get_active_game(message.chat.id)
-
-    message.text = (
-        f"Игра окончена!\nㅤ\n"
-        + players_roster(game, True, True)
-        + f"🤖 Дилер: {dealer_hand} ({dealer_score})"
-    )
-    message.reply_markup.inline_keyboard = GameKeyboard.EMPTY
-    await app.store.tg_api.edit_message(message)
-
-    await app.store.game.finish_game(game)

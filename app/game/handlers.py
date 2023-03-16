@@ -3,6 +3,7 @@ from app.game.logic import (
     create_game,
     join_game,
     makes_turn,
+    place_bet,
     send_msg_to_create_game,
     send_player_stats,
     send_rules,
@@ -36,13 +37,15 @@ async def handle_my_chat_member(my_chat_member: MyChatMemberUpdate):
 
 
 async def handle_callback_query(cb_query: CallbackQuery):
-    match cb_query.data:
+    match cb_query.data.split(":", maxsplit=1)[0]:
         case CallbackData.CREATE:
             cb_answer_text = await create_game(cb_query.message)
         case CallbackData.JOIN:
             cb_answer_text = await join_game(cb_query)
         case CallbackData.START:
             cb_answer_text = await start_game(cb_query)
+        case CallbackData.BET:
+            cb_answer_text = await place_bet(cb_query)
         case CallbackData.HIT:
             cb_answer_text = await makes_turn(
                 cb_query, PlayerState.waiting_for_hand

@@ -13,6 +13,10 @@ class CallbackAnswerText(str, Enum):
     MSG_ALREADY_MADE_TURN = "Вы уже сделали ход в этом раунде!"
     MSG_HIT = "Вы взяли карту!"
     MSG_STAND = "Вы закончили набор карт!"
+    MSG_JOIN_TO_TAKE_PART = "Присоединитесь для участия в игре!"
+    MSG_PLACE_BET = "Делайте ставки!"
+    MSG_ALREADY_PLACES_BET = "Вы уже сделали ставку!"
+    MSG_BID_ACCEPTED = "Ставка принята!"
 
 
 class Commands(str, Enum):
@@ -27,3 +31,4 @@ class CallbackData(str, Enum):
     START = "start"
     HIT = "hit"
     STAND = "stand"
+    BET = "bet"
