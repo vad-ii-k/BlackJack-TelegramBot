@@ -10,10 +10,10 @@ RUN apk -U add curl
 RUN curl -sSL https://install.python-poetry.org | python
 ENV PATH=/root/.local/bin:$PATH
 
-# Installing project dependencies from poetry.lock
+# Installing project dependencies from pyproject.toml
 RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH \
     VIRTUAL_ENV=/venv
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 # Will install into the /venv virtualenv
 RUN poetry install --no-root
