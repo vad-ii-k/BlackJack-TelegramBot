@@ -149,7 +149,7 @@ async def calc_game_results(game: GameModel, dealer_score: int):
         new_balance = player.balance
         if new_state == PlayerState.won:
             new_balance += player.bet
-        elif player.balance == PlayerState.lost:
+        elif new_state == PlayerState.lost:
             new_balance -= player.bet
 
         if player.state != new_state or player.balance != new_balance:
