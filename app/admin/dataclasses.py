@@ -16,4 +16,7 @@ class Admin:
 
     @classmethod
     def from_session(cls, session: Session) -> Optional["Admin"]:
-        return cls(id=session["admin"]["id"], email=session["admin"]["email"])
+        return cls(
+            id=session["admin_data"]["id"],
+            email=session["admin_data"]["email"]
+        )
