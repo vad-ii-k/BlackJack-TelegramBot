@@ -36,7 +36,7 @@ class PlayersRosterMsgText:
         return roster
 
     def with_bids(self) -> str:
-        roster = "Ставки сделаны!\nㅤ\n"
+        roster = "Ставки сделаны — ставок больше нет!\nㅤ\n"
         roster += "<u>Ставки игроков</u>: \n"
         for player in self.players:
             roster += f" — {player.user.name}: {player.bet} 💵\n"
@@ -56,12 +56,14 @@ class PlayersRosterMsgText:
         for player in self.players:
             roster += f"{EMOJI_BY_STATE[player.state]} {player.user.name}"
 
+            roster += f": {player.balance} (<b>"
             if player.state == PlayerState.won:
-                roster += f": + {player.bet} 💵\n"
+                roster += f"+{player.bet}"
             elif player.state == PlayerState.lost:
-                roster += f": - {player.bet} 💵\n"
+                roster += f"-{player.bet}"
             else:
-                roster += f": + 0 💵\n"
+                roster += "+0"
+            roster += ")</b> 💵\n"
 
             roster += f" {player.hand} ({final_score(player.score)})\nㅤ\n"
         return roster
