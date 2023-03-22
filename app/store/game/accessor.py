@@ -127,6 +127,12 @@ class GameAccessor(BaseAccessor):
         await self._select_first(query)
         await self.update_game(game, state=GameState.finished)
 
+    async def get_num_of_games_played_in_chat(self, chat_id: int) -> int:
+        async with self.app.database.session.begin() as session:
+            query = select(GameModel).where(GameModel.chat_id == chat_id)
+            result: ChunkedIteratorResult = await session.execute(query)
+            return len(result.scalars().all())
+
     async def get_player_statistics(
         self, tg_id: int
     ) -> PlayerStatisticsModel | None:
