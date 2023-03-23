@@ -1,5 +1,3 @@
-from typing import Optional
-
 from aiohttp.web import (
     Application as AiohttpApplication,
     Request as AiohttpRequest,
@@ -19,13 +17,13 @@ from app.web.routes import setup_routes
 
 
 class Application(AiohttpApplication):
-    config: Optional[Config] = None
-    store: Optional[Store] = None
-    database: Optional[Database] = None
+    config: Config | None = None
+    store: Store | None = None
+    database: Database | None = None
 
 
 class Request(AiohttpRequest):
-    admin: Optional[Admin] = None
+    admin: Admin | None = None
 
     @property
     def app(self) -> Application:
