@@ -20,6 +20,7 @@ class CallbackAnswerText(str, Enum):
 
 
 class Commands(str, Enum):
+    START = "/start"
     START_GAME = "/start_game"
     MY_STATISTICS = "/my_statistics"
     HELP = "/help"

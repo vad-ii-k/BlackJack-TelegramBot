@@ -24,6 +24,8 @@ async def handle_message(message: MessageUpdate):
         return
     command = message.text.removesuffix(f"@{app.config.bot.name}")
     match command:
+        case Commands.START:
+            await send_rules(message.chat)
         case Commands.START_GAME:
             await send_msg_to_create_game(message)
         case Commands.MY_STATISTICS:

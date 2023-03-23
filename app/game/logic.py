@@ -151,7 +151,7 @@ async def send_msg_to_create_game(message: MessageUpdate):
     if not game:
         message = Message(
             chat=message.chat,
-            text="Сыграем?",
+            text="🃏 Сыграем?",
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=GameKeyboard.CREATE_GAME
             ),
@@ -160,7 +160,7 @@ async def send_msg_to_create_game(message: MessageUpdate):
         await app.store.game.create_game(message.chat.id, game_msg.message_id)
         return
 
-    msg_text = "Игра уже запущена!"
+    msg_text = "⚠️ Игра уже запущена!"
     message = Message(
         chat=message.chat,
         text=msg_text,
@@ -199,8 +199,8 @@ async def send_player_stats(tg_user: User, chat: Chat):
 async def send_rules(chat: Chat):
     msg = """
 Привет 🫡
-Я бот для игры в blackjack 🃏.
-Перед началом ознакомьтесь с <a href='https://telegra.ph/Pravila-igry-v-Blackjack-03-10'>правилами</a>.
+Я бот для игры в blackjack 🃏
+Перед началом ознакомьтесь с <a href='https://telegra.ph/Pravila-igry-v-Blackjack-03-10'>правилами</a>
 """
     msg += (
         "\n🤖 Список моих команд:\n"
