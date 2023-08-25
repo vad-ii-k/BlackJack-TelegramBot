@@ -1,19 +1,15 @@
-FROM python:3.11-alpine
-ENV BOT_NAME=$BOT_NAME
+FROM python:3.11.4-alpine
 
-WORKDIR /usr/src/app/"${BOT_NAME:-tg_bot}"
+WORKDIR /usr/src/app/bj_21_bot
 
-# Installing curl for poetry
-RUN apk -U add curl
+ENV PATH=/venv/bin:/root/.local/bin:$PATH
+ENV VIRTUAL_ENV=/venv
 
-# Installing poetry
-RUN curl -sSL https://install.python-poetry.org | python
-ENV PATH=/root/.local/bin:$PATH
+RUN apk --no-cache add curl && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    apk del curl && \
+    python -m venv /venv
 
-# Installing project dependencies from pyproject.toml
-RUN python -m venv /venv
-ENV PATH=/venv/bin:$PATH \
-    VIRTUAL_ENV=/venv
-COPY pyproject.toml ./
-# Will install into the /venv virtualenv
-RUN poetry install --no-root
+COPY . .
+
+RUN poetry install --no-interaction --no-ansi --no-root --without=dev

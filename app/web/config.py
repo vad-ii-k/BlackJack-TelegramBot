@@ -15,7 +15,6 @@ class SessionConfig:
 @dataclass
 class BotConfig:
     token: str
-    name: str
 
 
 @dataclass
@@ -48,7 +47,7 @@ def setup_config(app: "Application", env_path: str):
 
     app.config = Config(
         session=SessionConfig(key=env.str("SESSION_KEY")),
-        bot=BotConfig(token=env.str("BOT_TOKEN"), name=env.str("BOT_NAME")),
+        bot=BotConfig(token=env.str("BOT_TOKEN")),
         database=DatabaseConfig(
             host=env.str("DB_HOST"),
             port=env.int("DB_PORT"),
