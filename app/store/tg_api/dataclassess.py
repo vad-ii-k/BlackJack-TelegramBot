@@ -40,7 +40,7 @@ class MessageUpdate(BaseModel):
 
 
 class ChatMember(BaseModel):
-    user = User
+    user: User
     status: Literal["member", "left"]
 
 

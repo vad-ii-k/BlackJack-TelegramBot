@@ -4,9 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.engine import ChunkedIteratorResult
 
 from app.admin.dataclasses import Admin
-from app.admin.models import AdminModel
 from app.base.base_accessor import BaseAccessor
-from app.store.database.sqlalchemy_base import mapper_registry
 
 
 class AdminAccessor(BaseAccessor):
@@ -27,4 +25,4 @@ class AdminAccessor(BaseAccessor):
         return admin
 
 
-mapper_registry.map_imperatively(Admin, AdminModel)
+# mapper_registry.map_imperatively(Admin, AdminModel)  # TODO: пофиксить

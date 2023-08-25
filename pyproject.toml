@@ -15,8 +15,8 @@ aiohttp-apispec = "^2.2.3"
 aiohttp-session = "^2.12.0"
 environs = "^9.5.0"
 cryptography = "^41.0.3"
-asyncpg = "^0.27.0"
-pydantic = "^1.10.5"
+asyncpg = "^0.28.0"
+pydantic = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"

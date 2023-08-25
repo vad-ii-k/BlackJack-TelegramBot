@@ -71,7 +71,7 @@ class TgApiAccessor(BaseAccessor):
             params={
                 "chat_id": message.chat.id,
                 "text": message.text,
-                "reply_markup": message.reply_markup.json(),
+                "reply_markup": message.reply_markup.model_dump_json(),
                 "reply_to_message_id": json.dumps(message.reply_to_message_id),
                 "parse_mode": "HTML",
                 "disable_web_page_preview": "true",
@@ -91,7 +91,7 @@ class TgApiAccessor(BaseAccessor):
                 "chat_id": message.chat.id,
                 "message_id": message.message_id,
                 "text": message.text,
-                "reply_markup": message.reply_markup.json(),
+                "reply_markup": message.reply_markup.model_dump_json(),
                 "parse_mode": "HTML",
             },
         ) as resp:
