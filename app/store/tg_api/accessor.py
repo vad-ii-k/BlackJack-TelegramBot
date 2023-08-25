@@ -70,6 +70,7 @@ class TgApiAccessor(BaseAccessor):
             url=self.server_url + "sendMessage",
             params={
                 "chat_id": message.chat.id,
+                "message_thread_id": json.dumps(message.message_thread_id),
                 "text": message.text,
                 "reply_markup": message.reply_markup.model_dump_json(),
                 "reply_to_message_id": json.dumps(message.reply_to_message_id),

@@ -155,6 +155,7 @@ async def send_msg_to_create_game(message: MessageUpdate):
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=GameKeyboard.CREATE_GAME
             ),
+            message_thread_id=message.message_thread_id,
         )
         game_msg = await app.store.tg_api.send_message(message)
         await app.store.game.create_game(message.chat.id, game_msg.message_id)
@@ -165,18 +166,19 @@ async def send_msg_to_create_game(message: MessageUpdate):
         chat=message.chat,
         text=msg_text,
         reply_to_message_id=game.message_id,
+        message_thread_id=message.message_thread_id,
     )
     await app.store.tg_api.send_message(message)
 
 
-async def send_player_stats(tg_user: User, chat: Chat):
+async def send_player_stats(tg_user: User, chat: Chat, thread_id: int):
     player = await app.store.game.get_player(tg_user.id)
     if not player:
         msg = (
             "Вы ни разу не играли со мной ☹️\n"
             f"Нажмите {Commands.START_GAME.value}, чтобы это исправить)"
         )
-        message = Message(chat=chat, text=msg)
+        message = Message(chat=chat, text=msg, message_thread_id=thread_id)
         await app.store.tg_api.send_message(message)
         return
 
@@ -193,10 +195,12 @@ async def send_player_stats(tg_user: User, chat: Chat):
     win_rate = stats.games_won / stats.games_played * 100
     msg += f"📊 Процент побед: {win_rate:.2f}%"
 
-    await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))
+    await app.store.tg_api.send_message(
+        message=Message(chat=chat, text=msg, message_thread_id=thread_id)
+    )
 
 
-async def send_rules(chat: Chat):
+async def send_rules(chat: Chat, thread_id: int | None = None):
     msg = """
 Привет 🫡
 Я бот для игры в blackjack 🃏
@@ -208,7 +212,9 @@ async def send_rules(chat: Chat):
         f"{Commands.MY_STATISTICS.value} - 📊 Статистика Ваших игр\n"
         f"{Commands.HELP.value} - ℹ️ Правила игры\n"
     )
-    await app.store.tg_api.send_message(message=Message(chat=chat, text=msg))
+    await app.store.tg_api.send_message(
+        message=Message(chat=chat, text=msg, message_thread_id=thread_id)
+    )
 
 
 async def finish_game(game: GameModel, message: Message):

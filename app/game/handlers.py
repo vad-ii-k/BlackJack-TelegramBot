@@ -25,13 +25,15 @@ async def handle_message(message: MessageUpdate):
     command = message.text.removesuffix(f"@{app.config.bot.name}")
     match command:
         case Commands.START:
-            await send_rules(message.chat)
+            await send_rules(message.chat, message.message_thread_id)
         case Commands.START_GAME:
             await send_msg_to_create_game(message)
         case Commands.MY_STATISTICS:
-            await send_player_stats(message.from_user, message.chat)
+            await send_player_stats(
+                message.from_user, message.chat, message.message_thread_id
+            )
         case Commands.HELP:
-            await send_rules(message.chat)
+            await send_rules(message.chat, message.message_thread_id)
 
 
 async def handle_my_chat_member(my_chat_member: MyChatMemberUpdate):

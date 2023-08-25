@@ -24,6 +24,7 @@ class Message(BaseModel):
         inline_keyboard=[[]]
     )
     reply_to_message_id: int | None = None
+    message_thread_id: int | None = None
 
 
 class User(BaseModel):
@@ -37,6 +38,7 @@ class MessageUpdate(BaseModel):
     from_user: User = Field(alias="from")
     chat: Chat
     text: str | None = None
+    message_thread_id: int | None = None
 
 
 class ChatMember(BaseModel):
